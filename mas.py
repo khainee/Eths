@@ -1,5 +1,5 @@
 from web3 import Web3
-from bip_utils import Bip32SeedGenerator, Bip44, Bip44Coins, Bip44Changes, Bip32MnemonicValidator
+from bip_utils import Bip39SeedGenerator, Bip44, Bip44Coins, Bip44Changes, Bip39MnemonicValidator
 
 # Connect to the Ethereum node
 node_url = 'http://node.masnet.ai:8545'
@@ -27,12 +27,12 @@ with open('mas_tes.txt', 'r') as file:
 for mnemonic_phrase in mnemonic_phrases:
     try:
         # Validate mnemonic phrase
-        if not Bip32MnemonicValidator(mnemonic_phrase).IsValid():
+        if not Bip39MnemonicValidator(mnemonic_phrase).IsValid():
             print(f"Invalid mnemonic phrase: {mnemonic_phrase}")
             continue
 
         # Generate seed from mnemonic phrase
-        seed_bytes = Bip32SeedGenerator(mnemonic_phrase).Generate()
+        seed_bytes = Bip39SeedGenerator(mnemonic_phrase).Generate()
 
         # Generate the BIP44 master key for Ethereum
         bip44_mst = Bip44.FromSeed(seed_bytes, Bip44Coins.ETHEREUM)
