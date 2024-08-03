@@ -21,11 +21,11 @@ mnemonic_phrases = [
 receiver_address = '0x64669F88Fd2cE75A2448C7F41B78e0bb6b79ce19'
 
 # Define the amount to send (in wei)
-amount_to_send = web3.toWei(0.499979, 'ether')
+amount_to_send = web3.to_wei(0.499979, 'ether')
 
 # Define gas and gas price
 gas_limit = 21000
-gas_price = web3.toWei('1', 'gwei')
+gas_price = web3.to_wei('1', 'gwei')
 
 with open('mas_tes.txt', 'r') as file:
     mnemonic_phrases = [line.strip() for line in file]
