@@ -7,6 +7,8 @@ import json
 node_url = 'http://node.masnet.ai:8545'
 web3 = Web3(Web3.HTTPProvider(node_url))
 
+Account.enable_unaudited_hdwallet_features()
+
 # Check if connected to the node
 if not web3.is_connected():
     raise Exception("Failed to connect to the Ethereum node")
