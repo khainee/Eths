@@ -1,3 +1,4 @@
 web3
 bip-utils
 mnemonic 
+eth_account
