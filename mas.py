@@ -25,6 +25,7 @@ chain_id = 220315  # Use the appropriate chain ID for your network
 
 # Initialize total transferred amount
 total_transferred = 0
+done_acc = 0
 
 # Initialize Mnemonic instance
 mnemo = Mnemonic("english")
