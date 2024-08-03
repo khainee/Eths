@@ -1,5 +1,5 @@
 from web3 import Web3
-from bip_utils import Bip39SeedGenerator, Bip44, Bip44Coins, Bip44Changes, Bip39MnemonicValidator
+from bip_utils import Bip32, Bip32Utils, Bip44, Bip44Coins, Bip44Changes, Bip39SeedGenerator, Bip39MnemonicValidator
 
 # Connect to the Ethereum node
 node_url = 'http://node.masnet.ai:8545'
@@ -34,8 +34,11 @@ for mnemonic_phrase in mnemonic_phrases:
         # Generate seed from mnemonic phrase
         seed_bytes = Bip39SeedGenerator(mnemonic_phrase).Generate()
 
-        # Generate the BIP44 master key for Ethereum
-        bip44_mst = Bip44.FromSeed(seed_bytes, Bip44Coins.ETHEREUM)
+        # Generate BIP32 root key
+        bip32_root_key = Bip32.FromSeed(seed_bytes)
+
+        # Derive the BIP44 master key for Ethereum
+        bip44_mst = Bip44.FromBip32Key(bip32_root_key, Bip44Coins.ETHEREUM)
 
         # Derive the private key from the master key
         bip44_acc = bip44_mst.Purpose().Coin().Account(0).Change(Bip44Changes.CHAIN_EXT).AddressIndex(0)
