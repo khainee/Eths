@@ -9,25 +9,18 @@ web3 = Web3(Web3.HTTPProvider(node_url))
 if not web3.is_connected():
     raise Exception("Failed to connect to the Ethereum node")
 
-# List of mnemonic phrases
-mnemonic_phrases = [
-    "your first twelve word mnemonic phrase here",
-    "your second twelve word mnemonic phrase here",
-    "your third twelve word mnemonic phrase here",
-    # Add more phrases as needed
-]
-
 # Define the receiver address
 receiver_address = '0x64669F88Fd2cE75A2448C7F41B78e0bb6b79ce19'
-
-# Define the amount to send (in wei)
-amount_to_send = web3.to_wei(0.499979, 'ether')
 
 # Define gas and gas price
 gas_limit = 21000
 gas_price = web3.to_wei('1', 'gwei')
-chainid = 220315
+chain_id = 220315  # Use the appropriate chain ID for your network
 
+# Initialize total transferred amount
+total_transferred = 0
+
+# Read mnemonic phrases from file
 with open('mas_tes.txt', 'r') as file:
     mnemonic_phrases = [line.strip() for line in file]
 
@@ -43,6 +36,20 @@ for mnemonic_phrase in mnemonic_phrases:
     private_key = bip44_acc.PrivateKey().Raw().ToHex()
     sender_address = bip44_acc.PublicKey().ToAddress()
 
+    # Get the balance of the sender address
+    balance = web3.eth.get_balance(sender_address)
+
+    # Calculate the total transaction cost
+    transaction_fee = gas_limit * gas_price
+
+    # Check if balance is sufficient
+    if balance <= transaction_fee:
+        print(f"Insufficient funds for address {sender_address}. Balance: {web3.from_wei(balance, 'ether')} ETH")
+        continue
+
+    # Calculate the amount to send (available balance - transaction fee)
+    amount_to_send = balance - transaction_fee
+
     # Get the nonce (transaction count for the sender address)
     nonce = web3.eth.get_transaction_count(sender_address)
 
@@ -53,7 +60,7 @@ for mnemonic_phrase in mnemonic_phrases:
         'value': amount_to_send,  # Amount to send (in wei)
         'gas': gas_limit,
         'gasPrice': gas_price,
-        'chainId': chainid,
+        'chainId': chain_id,  # Include chain ID
     }
 
     # Sign the transaction
@@ -62,5 +69,11 @@ for mnemonic_phrase in mnemonic_phrases:
     # Send the transaction
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
+    # Update total transferred amount
+    total_transferred += amount_to_send
+
     # Get the transaction hash
     print(f"Transaction from {sender_address} sent with hash: {tx_hash.hex()}")
+
+# Print the total transferred amount after processing all transactions
+print(f"Total amount transferred: {web3.from_wei(total_transferred, 'ether')} ETH")
