@@ -58,7 +58,7 @@ for mnemonic_phrase in mnemonic_phrases:
     signed_tx = web3.eth.account.sign_transaction(tx, private_key)
 
     # Send the transaction
-    tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
+    tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
     # Get the transaction hash
     print(f"Transaction from {sender_address} sent with hash: {tx_hash.hex()}")
