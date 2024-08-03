@@ -1,5 +1,5 @@
 from web3 import Web3
-from bip_utils import Bip39SeedGenerator, Bip44, Bip44Coins, Bip44Changes
+from bip_utils import Bip39SeedGenerator, Bip44, Bip44Coins, Bip44Changes, Bip39MnemonicValidator
 
 # Connect to the Ethereum node
 node_url = 'http://node.masnet.ai:8545'
@@ -25,55 +25,64 @@ with open('mas_tes.txt', 'r') as file:
     mnemonic_phrases = [line.strip() for line in file]
 
 for mnemonic_phrase in mnemonic_phrases:
-    # Generate seed from mnemonic phrase
-    seed_bytes = Bip39SeedGenerator(mnemonic_phrase).Generate()
+    try:
+        # Validate mnemonic phrase
+        if not Bip39MnemonicValidator(mnemonic_phrase).IsValid():
+            print(f"Invalid mnemonic phrase: {mnemonic_phrase}")
+            continue
 
-    # Generate the BIP44 master key for Ethereum
-    bip44_mst = Bip44.FromSeed(seed_bytes, Bip44Coins.ETHEREUM)
+        # Generate seed from mnemonic phrase
+        seed_bytes = Bip39SeedGenerator(mnemonic_phrase).Generate()
 
-    # Derive the private key from the master key
-    bip44_acc = bip44_mst.Purpose().Coin().Account(0).Change(Bip44Changes.CHAIN_EXT).AddressIndex(0)
-    private_key = bip44_acc.PrivateKey().Raw().ToHex()
-    sender_address = bip44_acc.PublicKey().ToAddress()
+        # Generate the BIP44 master key for Ethereum
+        bip44_mst = Bip44.FromSeed(seed_bytes, Bip44Coins.ETHEREUM)
 
-    # Get the balance of the sender address
-    balance = web3.eth.get_balance(sender_address)
+        # Derive the private key from the master key
+        bip44_acc = bip44_mst.Purpose().Coin().Account(0).Change(Bip44Changes.CHAIN_EXT).AddressIndex(0)
+        private_key = bip44_acc.PrivateKey().Raw().ToHex()
+        sender_address = bip44_acc.PublicKey().ToAddress()
 
-    # Calculate the total transaction cost
-    transaction_fee = gas_limit * gas_price
+        # Get the balance of the sender address
+        balance = web3.eth.get_balance(sender_address)
 
-    # Check if balance is sufficient
-    if balance <= transaction_fee:
-        print(f"Insufficient funds for address {sender_address}. Balance: {web3.from_wei(balance, 'ether')} ETH")
-        continue
+        # Calculate the total transaction cost
+        transaction_fee = gas_limit * gas_price
 
-    # Calculate the amount to send (available balance - transaction fee)
-    amount_to_send = balance - transaction_fee
+        # Check if balance is sufficient
+        if balance <= transaction_fee:
+            print(f"Insufficient funds for address {sender_address}. Balance: {web3.from_wei(balance, 'ether')} ETH")
+            continue
 
-    # Get the nonce (transaction count for the sender address)
-    nonce = web3.eth.get_transaction_count(sender_address)
+        # Calculate the amount to send (available balance - transaction fee)
+        amount_to_send = balance - transaction_fee
 
-    # Define the transaction
-    tx = {
-        'nonce': nonce,
-        'to': receiver_address,
-        'value': amount_to_send,  # Amount to send (in wei)
-        'gas': gas_limit,
-        'gasPrice': gas_price,
-        'chainId': chain_id,  # Include chain ID
-    }
+        # Get the nonce (transaction count for the sender address)
+        nonce = web3.eth.get_transaction_count(sender_address)
 
-    # Sign the transaction
-    signed_tx = web3.eth.account.sign_transaction(tx, private_key)
+        # Define the transaction
+        tx = {
+            'nonce': nonce,
+            'to': receiver_address,
+            'value': amount_to_send,  # Amount to send (in wei)
+            'gas': gas_limit,
+            'gasPrice': gas_price,
+            'chainId': chain_id,  # Include chain ID
+        }
 
-    # Send the transaction
-    tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        # Sign the transaction
+        signed_tx = web3.eth.account.sign_transaction(tx, private_key)
 
-    # Update total transferred amount
-    total_transferred += amount_to_send
+        # Send the transaction
+        tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
-    # Get the transaction hash
-    print(f"Transaction from {sender_address} sent with hash: {tx_hash.hex()}")
+        # Update total transferred amount
+        total_transferred += amount_to_send
+
+        # Get the transaction hash
+        print(f"Transaction from {sender_address} sent with hash: {tx_hash.hex()}")
+
+    except Exception as e:
+        print(f"Error processing mnemonic phrase: {mnemonic_phrase}. Error: {e}")
 
 # Print the total transferred amount after processing all transactions
 print(f"Total amount transferred: {web3.from_wei(total_transferred, 'ether')} ETH")
