@@ -1,5 +1,5 @@
 from web3 import Web3
-from bip_utils import Bip39SeedGenerator, Bip44, Bip44Coins, Bip44Changes, Bip39MnemonicValidator
+from bip_utils import Bip39SeedGenerator, Bip44, Bip44Coins, Bip44Changes, Bip39MnemonicValidator, Bip39Languages
 
 # Connect to the Ethereum node
 node_url = 'http://node.masnet.ai:8545'
@@ -29,7 +29,7 @@ with open('mas_tes.txt', 'r') as file:
 for mnemonic_phrase in mnemonic_phrases:
     try:
         # Validate mnemonic phrase
-        if not Bip39MnemonicValidator(mnemonic_phrase).IsValid():
+        if not Bip39MnemonicValidator(mnemonic_phrase, Bip39Languages.ENGLISH).IsValid():
             print(f"Invalid mnemonic phrase: {mnemonic_phrase}")
             continue
 
@@ -92,4 +92,3 @@ for mnemonic_phrase in mnemonic_phrases:
 
 # Print the total transferred amount after processing all transactions
 print(f"Total amount transferred: {web3.from_wei(total_transferred, 'ether')} ETH")
-    
