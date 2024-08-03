@@ -26,6 +26,7 @@ amount_to_send = web3.to_wei(0.499979, 'ether')
 # Define gas and gas price
 gas_limit = 21000
 gas_price = web3.to_wei('1', 'gwei')
+chainid = 220315
 
 with open('mas_tes.txt', 'r') as file:
     mnemonic_phrases = [line.strip() for line in file]
@@ -52,6 +53,7 @@ for mnemonic_phrase in mnemonic_phrases:
         'value': amount_to_send,  # Amount to send (in wei)
         'gas': gas_limit,
         'gasPrice': gas_price,
+        'chainId': chainid,
     }
 
     # Sign the transaction
