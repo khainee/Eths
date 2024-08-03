@@ -43,7 +43,7 @@ for mnemonic_phrase in mnemonic_phrases:
     sender_address = bip44_acc.PublicKey().ToAddress()
 
     # Get the nonce (transaction count for the sender address)
-    nonce = web3.eth.getTransactionCount(sender_address)
+    nonce = web3.eth.get_transaction_count(sender_address)
 
     # Define the transaction
     tx = {
