@@ -1,5 +1,7 @@
 from web3 import Web3
-from bip_utils import Bip39SeedGenerator, Bip44, Bip44Coins, Bip44Changes, Bip39MnemonicValidator, Bip39Languages
+from mnemonic import Mnemonic
+from eth_account import Account
+import json
 
 # Connect to the Ethereum node
 node_url = 'http://node.masnet.ai:8545'
@@ -22,6 +24,9 @@ chain_id = 220315  # Use the appropriate chain ID for your network
 # Initialize total transferred amount
 total_transferred = 0
 
+# Initialize Mnemonic instance
+mnemo = Mnemonic("english")
+
 # Read mnemonic phrases from file
 with open('mas_tes.txt', 'r') as file:
     mnemonic_phrases = [line.strip() for line in file]
@@ -29,20 +34,17 @@ with open('mas_tes.txt', 'r') as file:
 for mnemonic_phrase in mnemonic_phrases:
     try:
         # Validate mnemonic phrase
-        if not Bip39MnemonicValidator(mnemonic_phrase, Bip39Languages.ENGLISH).IsValid():
+        if not mnemo.check(mnemonic_phrase):
             print(f"Invalid mnemonic phrase: {mnemonic_phrase}")
             continue
 
         # Generate seed from mnemonic phrase
-        seed_bytes = Bip39SeedGenerator(mnemonic_phrase).Generate()
+        seed_bytes = mnemo.to_seed(mnemonic_phrase)
 
-        # Generate the BIP44 master key for Ethereum
-        bip44_mst = Bip44.FromSeed(seed_bytes, Bip44Coins.ETHEREUM)
-
-        # Derive the private key from the master key
-        bip44_acc = bip44_mst.Purpose().Coin().Account(0).Change(Bip44Changes.CHAIN_EXT).AddressIndex(0)
-        private_key = bip44_acc.PrivateKey().Raw().ToHex()
-        sender_address = bip44_acc.PublicKey().ToAddress()
+        # Generate the account from the seed
+        acct = Account.from_mnemonic(mnemonic_phrase)
+        sender_address = acct.address
+        private_key = acct.key
 
         print(f"Derived sender address: {sender_address}")
 
@@ -76,7 +78,7 @@ for mnemonic_phrase in mnemonic_phrases:
         }
 
         # Sign the transaction
-        signed_tx = web3.eth.account.sign_transaction(tx, private_key)
+        signed_tx = Account.sign_transaction(tx, private_key)
 
         # Send the transaction
         tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
