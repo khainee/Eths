@@ -25,6 +25,7 @@ chain_id = 220315  # Use the appropriate chain ID for your network
 
 # Initialize total transferred amount
 total_transferred = 0
+done_acc = 0
 
 # Initialize Mnemonic instance
 mnemo = Mnemonic("english")
@@ -48,12 +49,12 @@ for mnemonic_phrase in mnemonic_phrases:
         sender_address = acct.address
         private_key = acct.key
 
-        print(f"Derived sender address: {sender_address}")
+        #print(f"Derived sender address: {sender_address}")
 
         # Get the balance of the sender address
         balance = web3.eth.get_balance(sender_address)
 
-        print(f"Balance for {sender_address}: {web3.from_wei(balance, 'ether')} ETH")
+        #print(f"Balance for {sender_address}: {web3.from_wei(balance, 'ether')} ETH")
 
         # Calculate the total transaction cost
         transaction_fee = gas_limit * gas_price
@@ -87,12 +88,13 @@ for mnemonic_phrase in mnemonic_phrases:
 
         # Update total transferred amount
         total_transferred += amount_to_send
+        done_acc += 1
 
         # Get the transaction hash
-        print(f"Transaction from {sender_address} sent with hash: {tx_hash.hex()}")
+        #print(f"Transaction from {sender_address} sent with hash: {tx_hash.hex()}")
 
     except Exception as e:
         print(f"Error processing mnemonic phrase: {mnemonic_phrase}. Error: {e}")
 
 # Print the total transferred amount after processing all transactions
-print(f"Total amount transferred: {web3.from_wei(total_transferred, 'ether')} ETH")
+print(f"Total amount transferred: {web3.from_wei(total_transferred, 'ether')} ETH, doneacc: = {done_acc}")
