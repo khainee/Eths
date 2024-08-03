@@ -9,6 +9,8 @@ web3 = Web3(Web3.HTTPProvider(node_url))
 if not web3.is_connected():
     raise Exception("Failed to connect to the Ethereum node")
 
+print("Connected to Ethereum node")
+
 # Define the receiver address
 receiver_address = '0x64669F88Fd2cE75A2448C7F41B78e0bb6b79ce19'
 
@@ -42,8 +44,12 @@ for mnemonic_phrase in mnemonic_phrases:
         private_key = bip44_acc.PrivateKey().Raw().ToHex()
         sender_address = bip44_acc.PublicKey().ToAddress()
 
+        print(f"Derived sender address: {sender_address}")
+
         # Get the balance of the sender address
         balance = web3.eth.get_balance(sender_address)
+
+        print(f"Balance for {sender_address}: {web3.from_wei(balance, 'ether')} ETH")
 
         # Calculate the total transaction cost
         transaction_fee = gas_limit * gas_price
@@ -86,3 +92,4 @@ for mnemonic_phrase in mnemonic_phrases:
 
 # Print the total transferred amount after processing all transactions
 print(f"Total amount transferred: {web3.from_wei(total_transferred, 'ether')} ETH")
+    
