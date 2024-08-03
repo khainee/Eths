@@ -55,7 +55,7 @@ for mnemonic_phrase in mnemonic_phrases:
     }
 
     # Sign the transaction
-    signed_tx = web3.eth.account.signTransaction(tx, private_key)
+    signed_tx = web3.eth.account.sign_transaction(tx, private_key)
 
     # Send the transaction
     tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
