@@ -16,8 +16,8 @@ if not web3.is_connected():
 print("Connected to Ethereum node")
 
 # Define the receiver address
-receiver_address = '0x64669F88Fd2cE75A2448C7F41B78e0bb6b79ce19'
-
+#receiver_address = '0x64669F88Fd2cE75A2448C7F41B78e0bb6b79ce19'
+receiver_address = '0xD9475EE1CE7CbFc6e80CAf9d10446483b1dB4aaE'
 # Define gas and gas price
 gas_limit = 21000
 gas_price = web3.to_wei('1', 'gwei')
