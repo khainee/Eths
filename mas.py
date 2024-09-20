@@ -36,6 +36,8 @@ with open('mas_tes.txt', 'r') as file:
 for mnemonic_phrase in mnemonic_phrases:
     try:
         # Validate mnemonic phrase
+        is_vaild = mnemo.check(mnemonic_phrase)
+        print(is_vaild)
         if not mnemo.check(mnemonic_phrase):
             print(f"Invalid mnemonic phrase: {mnemonic_phrase}")
             continue
