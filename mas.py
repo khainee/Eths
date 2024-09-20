@@ -16,8 +16,8 @@ if not web3.is_connected():
 print("Connected to Ethereum node")
 
 # Define the receiver address
-receiver_address = '0x64669F88Fd2cE75A2448C7F41B78e0bb6b79ce19'
-
+#receiver_address = '0x64669F88Fd2cE75A2448C7F41B78e0bb6b79ce19'
+receiver_address = '0xD9475EE1CE7CbFc6e80CAf9d10446483b1dB4aaE'
 # Define gas and gas price
 gas_limit = 21000
 gas_price = web3.to_wei('1', 'gwei')
@@ -36,6 +36,8 @@ with open('mas_tes.txt', 'r') as file:
 for mnemonic_phrase in mnemonic_phrases:
     try:
         # Validate mnemonic phrase
+        is_vaild = mnemo.check(mnemonic_phrase)
+        print(is_vaild)
         if not mnemo.check(mnemonic_phrase):
             print(f"Invalid mnemonic phrase: {mnemonic_phrase}")
             continue
@@ -83,7 +85,7 @@ for mnemonic_phrase in mnemonic_phrases:
         signed_tx = Account.sign_transaction(tx, private_key)
 
         # Send the transaction
-        tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        tx_hash = web3.eth.send_raw_transaction(signed_tx.raw_transaction)
 
         # Update total transferred amount
         total_transferred += amount_to_send
