@@ -1,4 +1,4 @@
 web3
 bip-utils
 mnemonic 
-eth_account
+eth_account==0.13.1
