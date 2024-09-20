@@ -83,7 +83,7 @@ for mnemonic_phrase in mnemonic_phrases:
         signed_tx = Account.sign_transaction(tx, private_key)
 
         # Send the transaction
-        tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        tx_hash = web3.eth.send_raw_transaction(signed_tx.raw_transaction)
 
         # Update total transferred amount
         total_transferred += amount_to_send
