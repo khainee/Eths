@@ -4,7 +4,7 @@ from eth_account import Account
 import time
 
 # Connect to Ethereum mainnet via public node
-node_url = 'https://cloudflare-eth.com'  # Public mainnet node
+node_url = 'https://rpc.ankr.com/eth'  # Public mainnet node
 web3 = Web3(Web3.HTTPProvider(node_url))
 
 Account.enable_unaudited_hdwallet_features()
@@ -30,6 +30,7 @@ mnemonic_phrases = [mnemo.generate(strength=128) for _ in range(1000)]
 for idx, mnemonic_phrase in enumerate(mnemonic_phrases, 1):
     try:
         # Generate account
+        sleep(0.5)
         acct = Account.from_mnemonic(mnemonic_phrase)
         sender_address = acct.address
         private_key = acct.key if hasattr(acct, 'key') else acct.privateKey
